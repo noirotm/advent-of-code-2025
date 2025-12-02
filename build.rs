@@ -1,11 +1,8 @@
-use serde::Serialize;
-use serde_json::Value;
+use quote::{format_ident, quote};
 use std::error::Error;
-use std::fmt::Write as FmtWrite;
 use std::fs::read_dir;
 use std::path::{Path, PathBuf};
 use std::{fs, io};
-use tinytemplate::TinyTemplate;
 
 fn days(input_dir: &str) -> io::Result<Vec<u32>> {
     let mut days = read_dir(input_dir)?
@@ -18,39 +15,73 @@ fn days(input_dir: &str) -> io::Result<Vec<u32>> {
     Ok(days)
 }
 
-#[derive(Serialize)]
-struct Context<'a> {
-    days: &'a [u32],
-}
-
-fn leading_zero(v: &Value, output: &mut String) -> tinytemplate::error::Result<()> {
-    if let Value::Number(n) = v
-        && let Some(n) = n.as_u64()
-    {
-        write!(output, "{0:02}", n)?;
-    }
-
-    Ok(())
-}
-
 fn gen_solutions_mod<P: AsRef<Path>>(p: P, days: &[u32]) -> io::Result<()> {
-    let mut tpl = TinyTemplate::new();
-    tpl.add_template("mod", include_str!("mod.rs.template"))
-        .unwrap();
-    tpl.add_formatter("leading_zero", leading_zero);
-    let s = tpl.render("mod", &Context { days }).unwrap();
+    let day_strings = days
+        .iter()
+        .map(|d| format!("{0:02}", d))
+        .collect::<Vec<_>>();
+    let mods = day_strings
+        .iter()
+        .map(|s| format_ident!("day{}", s))
+        .collect::<Vec<_>>();
 
-    fs::write(p, s)
+    let tokens = quote! {
+        use crate::solver::{ProblemOutput, Solver};
+
+        #(mod #mods;)*
+
+        pub fn exec_day(day: u32) -> Option<ProblemOutput> {
+            match day {
+                #(#days => Some(#mods::Problem.solve(day)),)*
+                _ => None,
+            }
+        }
+
+        pub fn exec_all_days() -> Vec<ProblemOutput> {
+            vec![#(#mods::Problem.solve(#days)),*]
+        }
+    };
+    let syntax_tree = syn::parse2(tokens).expect("valid token stream");
+    let pretty = prettyplease::unparse(&syntax_tree);
+
+    fs::write(p, pretty)
 }
 
 fn gen_solutions(dir: &str, days: &[u32]) -> io::Result<()> {
+    let token_stream = quote! {
+        use crate::solver::Solver;
+        use std::io::BufRead;
+
+        pub struct Problem;
+
+        impl Solver for Problem {
+            type Input = ();
+            type Output1 = u64;
+            type Output2 = u64;
+
+            fn parse_input<R: BufRead>(&self, r: R) -> anyhow::Result<Self::Input> {
+                todo!()
+            }
+
+            fn solve_first(&self, input: &Self::Input) -> Self::Output1 {
+                todo!()
+            }
+
+            fn solve_second(&self, input: &Self::Input) -> Self::Output2 {
+                todo!()
+            }
+        }
+    };
+    let syntax_tree = syn::parse2(token_stream).expect("valid token stream");
+    let pretty = prettyplease::unparse(&syntax_tree);
+
     for day in days {
         let file = PathBuf::from(format!("{}/day{:02}.rs", dir, day));
         if file.exists() {
             continue;
         }
 
-        fs::copy("solution.rs.template", file)?;
+        fs::write(file, &pretty)?;
     }
 
     Ok(())
