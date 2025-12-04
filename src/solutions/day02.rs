@@ -71,13 +71,7 @@ fn is_id_invalid(id: u64) -> bool {
     }
 
     let mid = b.len() / 2;
-    for i in 0..mid {
-        if b[i] != b[i + mid] {
-            return false;
-        }
-    }
-
-    true
+    (0..mid).all(|i| b[i] == b[i + mid])
 }
 
 fn is_id_really_invalid(id: u64) -> bool {
@@ -86,16 +80,14 @@ fn is_id_really_invalid(id: u64) -> bool {
 
     // for each possible cut point (1 to n/2), if b is a multiple of n, create n chunks, and
     // see if they're all the same. Once we have a positive return true, else return false
-    for i in 1..=b.len() / 2 {
-        if b.len().is_multiple_of(i) {
-            let w = b.chunks(i).collect::<Vec<_>>();
-            if w.windows(2).all(|w| w[0] == w[1]) {
-                return true;
-            }
-        }
-    }
-
-    false
+    (1..=b.len() / 2)
+        .filter(|i| b.len().is_multiple_of(*i))
+        .any(|i| {
+            b.chunks(i)
+                .collect::<Vec<_>>()
+                .windows(2)
+                .all(|w| w[0] == w[1])
+        })
 }
 
 #[cfg(test)]
