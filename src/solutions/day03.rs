@@ -35,14 +35,15 @@ impl Bank {
 
         // find biggest in all but the last N-1
         while found < n {
-            let (next_pos, joltage) = self.batteries[pos..self.batteries.len() - (n - found - 1)]
+            let remaining = n - found - 1;
+            let (next_pos, joltage) = self.batteries[pos..self.batteries.len() - remaining]
                 .iter()
                 .cloned()
                 .enumerate()
                 .rev()
                 .max_by(|&(_, a), &(_, b)| a.cmp(&b))
                 .unwrap_or((0, 0));
-            total += joltage as u64 * 10u64.pow(n as u32 - found as u32 - 1);
+            total += joltage as u64 * 10u64.pow(remaining as u32);
             pos += next_pos + 1;
             found += 1;
         }
