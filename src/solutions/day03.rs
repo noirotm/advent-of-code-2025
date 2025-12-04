@@ -28,22 +28,6 @@ pub struct Bank {
 }
 
 impl Bank {
-    fn largest_pair(&self) -> u8 {
-        // find biggest in all but the last
-        let (i, dozen) = self.batteries[0..self.batteries.len() - 1]
-            .iter()
-            .cloned()
-            .enumerate()
-            .rev()
-            .max_by(|&(_, a), &(_, b)| a.cmp(&b))
-            .unwrap_or((0, 0));
-
-        // find largest in second part of the array
-        let digit = self.batteries[i + 1..].iter().cloned().max().unwrap_or(0);
-
-        dozen * 10 + digit
-    }
-
     fn largest_n(&self, n: usize) -> u64 {
         let mut total = 0;
         let mut found = 0;
@@ -80,28 +64,6 @@ impl FromStr for Bank {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_largest_pair() {
-        assert_eq!(
-            Bank::from_str("987654321111111").unwrap().largest_pair(),
-            98
-        );
-        assert_eq!(
-            Bank::from_str("811111111111119").unwrap().largest_pair(),
-            89
-        );
-        assert_eq!(
-            Bank::from_str("234234234234278").unwrap().largest_pair(),
-            78
-        );
-        assert_eq!(
-            Bank::from_str("818181911112111").unwrap().largest_pair(),
-            92
-        );
-        assert_eq!(Bank::from_str("90997").unwrap().largest_pair(), 99);
-        assert_eq!(Bank::from_str("5772447636633536424366261954729934453835645363432553634652753366355883885321733333657475668366474567").unwrap().largest_pair(), 99);
-    }
 
     #[test]
     fn test_largest_n_2() {
