@@ -4,7 +4,7 @@ use std::env;
 use std::time::Duration;
 
 mod grid;
-#[allow(dead_code)]
+#[allow(unused)]
 mod parsing;
 mod solutions;
 mod solver;

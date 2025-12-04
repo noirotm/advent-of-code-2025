@@ -25,7 +25,8 @@ impl Display for ProblemOutput {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(
             f,
-            "Parsing: ({})",
+            "Parsing:{:<20} ({})",
+            "",
             format_duration(self.timings.parse_duration)
         )?;
         writeln!(
