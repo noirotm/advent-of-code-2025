@@ -8,6 +8,7 @@ build = "build.rs"
 [dependencies]
 anyhow = "1.0.93"
 humantime = "2.1.0"
+rayon = "1.11.0"
 sscanf = "0.4.2"
 
 [build-dependencies]

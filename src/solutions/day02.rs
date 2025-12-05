@@ -1,6 +1,7 @@
 use crate::parsing::BufReadExt;
 use crate::solver::Solver;
 use anyhow::anyhow;
+use rayon::prelude::*;
 use sscanf::sscanf;
 use std::io::BufRead;
 use std::str::FromStr;
@@ -17,31 +18,25 @@ impl Solver for Problem {
     }
 
     fn solve_first(&self, input: &Self::Input) -> Self::Output1 {
-        let mut total = 0;
-
-        for r in input {
-            for n in r.start..=r.end {
-                if is_id_invalid(n) {
-                    total += n;
-                }
-            }
-        }
-
-        total
+        input
+            .into_par_iter()
+            .flat_map(|r| {
+                (r.start..=r.end)
+                    .into_par_iter()
+                    .filter(|&n| is_id_invalid(n))
+            })
+            .sum::<u64>()
     }
 
     fn solve_second(&self, input: &Self::Input) -> Self::Output2 {
-        let mut total = 0;
-
-        for r in input {
-            for n in r.start..=r.end {
-                if is_id_really_invalid2(n) {
-                    total += n;
-                }
-            }
-        }
-
-        total
+        input
+            .into_par_iter()
+            .flat_map(|r| {
+                (r.start..=r.end)
+                    .into_par_iter()
+                    .filter(|&n| is_id_really_invalid2(n))
+            })
+            .sum::<u64>()
     }
 }
 
@@ -74,6 +69,7 @@ fn is_id_invalid(id: u64) -> bool {
     (0..mid).all(|i| b[i] == b[i + mid])
 }
 
+#[allow(unused)]
 fn is_id_really_invalid(id: u64) -> bool {
     let s = id.to_string();
     let b = s.as_bytes();
