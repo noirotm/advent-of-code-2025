@@ -197,6 +197,7 @@ impl<T> Grid<T> {
             grid: self,
             row,
             pos: 0,
+            pos_rev: self.w - 1,
         }
     }
 
@@ -205,6 +206,7 @@ impl<T> Grid<T> {
             grid: self,
             col,
             pos: 0,
+            pos_rev: self.h - 1,
         }
     }
 
@@ -344,6 +346,7 @@ pub struct ColIter<'a, T> {
     grid: &'a Grid<T>,
     col: usize,
     pos: usize,
+    pos_rev: usize,
 }
 
 impl<'a, T> Iterator for ColIter<'a, T> {
@@ -357,10 +360,19 @@ impl<'a, T> Iterator for ColIter<'a, T> {
     }
 }
 
+impl<'a, T> DoubleEndedIterator for ColIter<'a, T> {
+    fn next_back(&mut self) -> Option<<Self as Iterator>::Item> {
+        let val = self.grid.get((self.col, self.pos_rev))?;
+        self.pos_rev -= 1;
+        Some(val)
+    }
+}
+
 pub struct RowIter<'a, T> {
     grid: &'a Grid<T>,
     row: usize,
     pos: usize,
+    pos_rev: usize,
 }
 
 impl<'a, T> Iterator for RowIter<'a, T> {
@@ -370,6 +382,14 @@ impl<'a, T> Iterator for RowIter<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         let val = self.grid.get((self.pos, self.row))?;
         self.pos += 1;
+        Some(val)
+    }
+}
+
+impl<'a, T> DoubleEndedIterator for RowIter<'a, T> {
+    fn next_back(&mut self) -> Option<<Self as Iterator>::Item> {
+        let val = self.grid.get((self.pos, self.pos_rev))?;
+        self.pos_rev -= 1;
         Some(val)
     }
 }
