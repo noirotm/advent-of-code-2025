@@ -5,6 +5,7 @@ mod day03;
 mod day04;
 mod day05;
 mod day06;
+mod day07;
 pub fn exec_day(day: u32) -> Option<ProblemOutput> {
     match day {
         1u32 => Some(day01::Problem.solve(day)),
@@ -13,6 +14,7 @@ pub fn exec_day(day: u32) -> Option<ProblemOutput> {
         4u32 => Some(day04::Problem.solve(day)),
         5u32 => Some(day05::Problem.solve(day)),
         6u32 => Some(day06::Problem.solve(day)),
+        7u32 => Some(day07::Problem.solve(day)),
         _ => None,
     }
 }
@@ -20,6 +22,6 @@ pub fn exec_all_days() -> Vec<ProblemOutput> {
     vec![
         day01::Problem.solve(1u32), day02::Problem.solve(2u32), day03::Problem
         .solve(3u32), day04::Problem.solve(4u32), day05::Problem.solve(5u32),
-        day06::Problem.solve(6u32)
+        day06::Problem.solve(6u32), day07::Problem.solve(7u32)
     ]
 }
